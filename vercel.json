@@ -5,7 +5,7 @@
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
-    "NEXT_PUBLIC_API_BASE_URL": "@lego-api-base-url"
+    "NEXT_PUBLIC_API_BASE_URL": "https://lego-menswear-backend-abf196114bd9.herokuapp.com"
   },
   "headers": [
     {
