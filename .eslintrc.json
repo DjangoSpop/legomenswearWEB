@@ -1,0 +1,25 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "react/no-unescaped-entities": [
+      "error",
+      {
+        "forbid": []
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*-test/**",
+        "**/*test*.tsx",
+        "**/api-test/**",
+        "**/image-test/**",
+        "**/stock-check/**"
+      ],
+      "rules": {
+        "react/no-unescaped-entities": "off"
+      }
+    }
+  ]
+}

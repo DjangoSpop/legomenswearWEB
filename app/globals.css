@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   ZARA-LIKE PREMIUM E-COMMERCE STYLES
+   ============================================================================ */
+
+@layer base {
+  :root {
+    --background: #FAFAFA;
+    --foreground: #1A1A1A;
+  }
+
+  * {
+    @apply border-brand-border;
+  }
+
+  body {
+    @apply bg-brand-offwhite text-brand-black antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-normal tracking-tight;
+  }
+
+  /* Remove autofill styles */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@layer components {
+  /* Button styles - minimal and clean */
+  .btn {
+    @apply px-6 py-3 text-body font-medium transition-all duration-200 border;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-black text-white border-brand-black hover:bg-brand-darkgray;
+  }
+
+  .btn-secondary {
+    @apply btn bg-white text-brand-black border-brand-border hover:bg-brand-offwhite;
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent text-brand-black border-brand-black hover:bg-brand-black hover:text-white;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-4 py-3 text-body border border-brand-lightgray bg-white;
+    @apply focus:outline-none focus:border-brand-black transition-colors;
+  }
+
+  .input-error {
+    @apply input border-accent-red;
+  }
+
+  /* Label styles */
+  .label {
+    @apply block text-micro uppercase tracking-wider text-brand-gray mb-2;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white border border-brand-lightgray;
+  }
+
+  /* Price styles */
+  .price {
+    @apply font-medium text-brand-black;
+  }
+
+  .price-sale {
+    @apply text-accent-sale;
+  }
+
+  .price-original {
+    @apply line-through text-brand-gray text-sm;
+  }
+
+  /* Link styles */
+  .link {
+    @apply text-brand-black hover:text-brand-gray transition-colors underline-offset-2;
+  }
+
+  /* Uppercase micro labels (Zara style) */
+  .micro-label {
+    @apply text-micro uppercase tracking-wider text-brand-gray;
+  }
+
+  /* Grid layouts */
+  .grid-products {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6;
+  }
+
+  /* Container */
+  .container-page {
+    @apply max-w-8xl mx-auto px-4 md:px-6 lg:px-8;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-brand-lightgray;
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Aspect ratios for product images */
+  .aspect-product {
+    aspect-ratio: 3 / 4;
+  }
+
+  .aspect-hero {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Glass effect for overlays */
+  .glass {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Slide up animation for floating elements */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+}

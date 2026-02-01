@@ -1,0 +1,27 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow sensitive areas
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+Disallow: /.next
+Disallow: /*?*sort= # Prevent crawling of sorted filtered results
+Disallow: /*?*page=
+
+# Sitemaps
+Sitemap: https://legomenswear.com/sitemap.xml
+Sitemap: https://legomenswear.com/sitemap-products.xml
+
+# Crawl delay for better performance
+Crawl-delay: 1
+
+# Important crawlers
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

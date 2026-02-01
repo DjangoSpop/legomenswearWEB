@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Image Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h1 { color: #333; }
+        .test-box {
+            border: 2px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success { border-color: #4CAF50; background: #f1f8f4; }
+        .error { border-color: #f44336; background: #fef1f0; }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #1976D2; }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Direct Image Loading Test</h1>
+        <p>This page tests if images from your backend can be loaded directly, bypassing Next.js.</p>
+    </div>
+
+    <div class="container">
+        <h2>Step 1: Fetch Products</h2>
+        <button onclick="fetchProducts()">Fetch Products from Backend</button>
+        <div id="fetchLog" class="log" style="display:none;"></div>
+    </div>
+
+    <div id="imageTests"></div>
+
+    <div class="container">
+        <h2>Manual Test</h2>
+        <p>Paste an image URL to test:</p>
+        <input type="text" id="manualUrl" style="width: 100%; padding: 8px; margin: 10px 0;" placeholder="https://lego-menswear-backend...herokuapp.com/media/products/.../image.jpg">
+        <button onclick="testManualUrl()">Test This URL</button>
+        <div id="manualResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://lego-menswear-backend-abf196114bd9.herokuapp.com';
+        let fetchLog = document.getElementById('fetchLog');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            fetchLog.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            fetchLog.style.display = 'block';
+            console.log(message);
+        }
+
+        async function fetchProducts() {
+            fetchLog.innerHTML = '';
+            log('Fetching products from ' + API_BASE + '/api/products/');
+
+            try {
+                const response = await fetch(API_BASE + '/api/products/');
+                log('Response status: ' + response.status, response.ok ? 'success' : 'error');
+
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+
+                const products = await response.json();
+                log('✓ Got ' + products.length + ' products', 'success');
+
+                document.getElementById('imageTests').innerHTML = '';
+
+                products.forEach((product, index) => {
+                    log(`Product ${index + 1}: ${product.name}`);
+
+                    const imagePaths = product.imagePaths || [];
+                    const images = product.images || [];
+
+                    if (imagePaths.length > 0) {
+                        log(`  → Found ${imagePaths.length} images in imagePaths`, 'success');
+                        displayImageTest(product.name, imagePaths[0], 'imagePaths (camelCase)');
+                    } else if (images.length > 0 && images[0].image) {
+                        log(`  → Found ${images.length} images in images array`, 'success');
+                        displayImageTest(product.name, images[0].image, 'images array (snake_case)');
+                    } else {
+                        log(`  → No images found`, 'error');
+                    }
+                });
+
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function displayImageTest(productName, imageUrl, source) {
+            const container = document.getElementById('imageTests');
+            const testBox = document.createElement('div');
+            testBox.className = 'container';
+
+            testBox.innerHTML = `
+                <h3>${productName}</h3>
+                <p><strong>Source:</strong> ${source}</p>
+                <p><strong>URL:</strong> <code>${imageUrl}</code></p>
+                <button onclick="testImageUrl('${imageUrl}', '${productName}')">Test Accessibility</button>
+                <div id="test-${btoa(imageUrl).substring(0, 10)}" style="margin-top: 10px;">
+                    <p>Loading image...</p>
+                    <img src="${imageUrl}"
+                         onload="handleImageLoad('${imageUrl}', '${productName}')"
+                         onerror="handleImageError('${imageUrl}', '${productName}')"
+                         style="display: none;">
+                </div>
+            `;
+
+            container.appendChild(testBox);
+        }
+
+        function handleImageLoad(url, name) {
+            const id = btoa(url).substring(0, 10);
+            const div = document.getElementById('test-' + id);
+            div.className = 'test-box success';
+            div.innerHTML = `
+                <p style="color: green; font-weight: bold;">✓ SUCCESS: Image loaded!</p>
+                <img src="${url}" style="display: block; max-width: 400px;">
+            `;
+            log(`✓ Image loaded for ${name}`, 'success');
+        }
+
+        function handleImageError(url, name) {
+            const id = btoa(url).substring(0, 10);
+            const div = document.getElementById('test-' + id);
+            div.className = 'test-box error';
+            div.innerHTML = `
+                <p style="color: red; font-weight: bold;">❌ FAILED: Image did not load</p>
+                <p>Possible issues:</p>
+                <ul>
+                    <li>Image doesn't exist at this URL (404)</li>
+                    <li>CORS headers blocking access</li>
+                    <li>File not uploaded to Heroku</li>
+                    <li>Heroku ephemeral filesystem cleared the file</li>
+                </ul>
+                <p><strong>Solution:</strong> Use AWS S3 or Cloudinary for Heroku</p>
+            `;
+            log(`❌ Image failed to load for ${name}`, 'error');
+        }
+
+        async function testImageUrl(url, name) {
+            log(`Testing URL accessibility: ${url}`);
+
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                log(`HEAD request status: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    log(`✓ Image is accessible at URL`, 'success');
+                } else {
+                    log(`❌ Image returned ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Fetch error: ${error.message}`, 'error');
+            }
+        }
+
+        function testManualUrl() {
+            const url = document.getElementById('manualUrl').value;
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            const resultDiv = document.getElementById('manualResult');
+            resultDiv.innerHTML = `
+                <div style="margin-top: 20px; padding: 20px; border: 2px solid #ddd; border-radius: 8px;">
+                    <p>Testing URL: <code>${url}</code></p>
+                    <p>Loading...</p>
+                    <img src="${url}"
+                         onload="this.parentElement.innerHTML = '<p style=color:green;font-weight:bold;>✓ SUCCESS! Image loaded.</p><img src=${url} style=max-width:400px;>'"
+                         onerror="this.parentElement.innerHTML = '<p style=color:red;font-weight:bold;>❌ FAILED! Image did not load.</p><p>Possible issues: 404, CORS, or file doesn\\'t exist.</p>'"
+                         style="display: none;">
+                </div>
+            `;
+        }
+
+        // Auto-fetch on load
+        window.onload = () => {
+            log('Page loaded. Click "Fetch Products" to test.');
+        };
+    </script>
+</body>
+</html>
