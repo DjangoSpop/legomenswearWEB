@@ -135,3 +135,6 @@ dist
 # Temporary folders
 tmp/
 temp/
+
+# Ignore Windows reserved device name if created accidentally
+nul
