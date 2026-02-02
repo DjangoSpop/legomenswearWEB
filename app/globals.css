@@ -159,4 +159,59 @@
   .animate-slide-up {
     animation: slide-up 0.3s ease-out;
   }
+
+  /* Fade in animation for cards */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out;
+  }
+
+  /* Smooth scale animation for interactive elements */
+  .tap-scale {
+    transition: transform 0.15s ease-out;
+  }
+
+  .tap-scale:active {
+    transform: scale(0.98);
+  }
+
+  /* Image cross-fade transition */
+  .image-crossfade {
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Premium shadow for cards */
+  .shadow-premium {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-premium-hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Performance optimization for animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

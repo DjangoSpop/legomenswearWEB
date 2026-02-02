@@ -9,6 +9,7 @@ import { getProductById } from '@/lib/api/catalog';
 import { useCartStore } from '@/lib/store/cart';
 import ImageGallery from '../../components/product/ImageGallery';
 import ShareButton from '../../components/product/ShareButton';
+import SizeSelector from '../../components/product/SizeSelector';
 import { Skeleton } from '../../components/ui/Skeleton';
 
 export default function ProductDetailPage() {
@@ -235,29 +236,12 @@ export default function ProductDetailPage() {
 
             {/* Size Selector */}
             {product.sizes && product.sizes.length > 0 && (
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm font-medium">SELECT SIZE</span>
-                  {selectedSize && (
-                    <span className="text-sm text-gray-500">Selected: {selectedSize}</span>
-                  )}
-                </div>
-                <div className="grid grid-cols-4 gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`py-3 text-sm font-medium border transition-all ${
-                        selectedSize === size
-                          ? 'border-black bg-black text-white'
-                          : 'border-gray-300 hover:border-black'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <SizeSelector
+                sizes={product.sizes}
+                selectedSize={selectedSize}
+                onSizeChange={setSelectedSize}
+                sizeQuantities={product.sizeQuantities}
+              />
             )}
 
             {/* Color Selector */}

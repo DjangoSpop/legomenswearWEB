@@ -102,6 +102,13 @@ export default function RootLayout({
         {/* Preconnect to external resources */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Favicon (cache-busted and multiple rels for compatibility) */}
+        <link rel="icon" href="/favicon.ico?v=2" />
+        <link rel="shortcut icon" href="/favicon.ico?v=2" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/lego_menswear_logo.png?v=2" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/lego_menswear_logo.png?v=2" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
+        <meta name="theme-color" content="#ffffff" />
         
         {/* DNS Prefetch for backend API */}
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} />
