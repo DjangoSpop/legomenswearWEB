@@ -75,11 +75,10 @@ export default function ProductDetailPage() {
       ? product.discountedPrice
       : product.price;
 
-    // Use backend-provided shareUrl if available, otherwise build it
-    const shareUrl = product.shareUrl || 
-      (typeof window !== 'undefined'
-        ? `${window.location.origin}/products/${product.id}`
-        : `/products/${product.id}`);
+    // Always build frontend URL (ignore backend's shareUrl which points to API)
+    const shareUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/products/${product.id}`
+      : `/products/${product.id}`;
 
     // Add items one by one based on quantity
     for (let i = 0; i < quantity; i++) {

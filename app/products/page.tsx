@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Product, CategoryEnum, ProductListParams } from '@/lib/types/api';
 import { getProducts } from '@/lib/api/catalog';
@@ -28,16 +28,7 @@ function ProductsContent() {
   );
   const [sortOrder, setSortOrder] = useState<string>('-created_at');
 
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadProducts();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [selectedCategory, searchQuery, sortOrder]);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -70,7 +61,16 @@ function ProductsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, searchQuery, sortOrder]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadProducts();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [loadProducts]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);

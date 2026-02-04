@@ -12,6 +12,14 @@ export type CategoryEnum = 'Men' | 'Women' | 'Kids' | 'Accessories' | 'Shoes';
 
 export type RoleEnum = 'buyer' | 'seller' | 'admin';
 
+export type OrderStatus = 
+  | 'pending'       // Order created, awaiting admin review
+  | 'confirmed'     // Admin confirmed, stock reduced
+  | 'processing'    // Order being prepared
+  | 'shipped'       // Order dispatched
+  | 'delivered'     // Order delivered to customer
+  | 'cancelled';    // Order cancelled
+
 // ============================================================================
 // PRODUCT TYPES (matching Flutter Product.fromJson())
 // ============================================================================
@@ -201,4 +209,125 @@ export interface WhatsAppCheckoutData {
   customerAddress?: string;
   items: CartItem[];
   total: number;
+}
+
+// ============================================================================
+// ORDER TYPES (Backend uses snake_case, matching OpenAPI schema)
+// ============================================================================
+
+/**
+ * Order item as returned from backend (snake_case)
+ */
+export interface OrderItemBackend {
+  id: string;
+  product: string; // Product ID (UUID)
+  product_name: string; // Denormalized for display
+  product_barcode?: string; // SKU/barcode for reference
+  product_image?: string; // Product image URL
+  quantity: number;
+  unit_price: string; // Decimal as string
+  selected_size?: string;
+  selected_color?: string;
+  subtotal: string; // Decimal as string (quantity * unit_price)
+}
+
+/**
+ * Order as returned from backend (snake_case)
+ */
+export interface OrderBackend {
+  id: string;
+  order_reference: string; // LEG-XXXX-XXXX format
+  order_date: string; // ISO timestamp
+  customer_name: string;
+  customer_phone: string;
+  customer_address?: string;
+  user?: string; // User ID if authenticated (nullable for guest orders)
+  status: OrderStatus;
+  items?: OrderItemBackend[]; // Optional: only present in detail view
+  total: string; // Decimal as string
+  item_count: number; // Total quantity of items
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Order item for frontend use (camelCase, numbers converted)
+ */
+export interface OrderItem {
+  id: string;
+  product: string; // Product ID (UUID)
+  productName: string; // Denormalized for display
+  productBarcode?: string; // SKU/barcode for reference
+  productImage?: string; // Product image URL
+  quantity: number;
+  unitPrice: number;
+  selectedSize?: string;
+  selectedColor?: string;
+  subtotal: number; // quantity * unitPrice
+}
+
+/**
+ * Order for frontend use (camelCase, numbers converted)
+ */
+export interface Order {
+  id: string;
+  orderReference: string; // LEG-XXXX-XXXX format
+  orderDate: string; // ISO timestamp
+  customerName: string;
+  customerPhone: string;
+  customerAddress?: string;
+  user?: string; // User ID if authenticated (nullable for guest orders)
+  status: OrderStatus;
+  items?: OrderItem[]; // Optional: only present in detail view
+  total: number;
+  itemCount: number; // Total quantity of items
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Request body for creating a new order (snake_case for backend)
+ */
+export interface CreateOrderRequest {
+  order_reference: string; // Generated on frontend: LEG-{TIMESTAMP}-{RANDOM}
+  order_date: string; // ISO timestamp
+  customer_name: string;
+  customer_phone: string;
+  customer_address?: string;
+  items: {
+    product: string; // Product UUID
+    product_name: string;
+    product_barcode?: string;
+    product_image?: string;
+    quantity: number;
+    unit_price: string; // Send as string decimal
+    selected_size?: string;
+    selected_color?: string;
+  }[];
+  total: string; // Send as string decimal
+  item_count: number; // Total quantity of items
+}
+
+/**
+ * Request body for updating order status (snake_case for backend)
+ */
+export interface UpdateOrderStatusRequest {
+  status: OrderStatus;
+}
+
+/**
+ * Response from order confirmation (includes stock update results)
+ */
+export interface ConfirmOrderResponse {
+  success: boolean;
+  order: OrderBackend; // Backend returns snake_case
+  stock_updated?: boolean;
+  message?: string;
+}
+
+export interface ConfirmOrderResponseTransformed {
+  success: boolean;
+  order: Order; // Transformed to camelCase
+  stockUpdated?: boolean;
+  message?: string;
 }

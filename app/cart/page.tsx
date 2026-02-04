@@ -12,7 +12,10 @@ import {
   getWhatsAppLink,
   copyToClipboard,
   STORE_WHATSAPP_NUMBER,
+  generateOrderReference,
 } from '@/lib/utils/whatsapp';
+import { createOrder } from '@/lib/api/orders';
+import type { CreateOrderRequest } from '@/lib/types/api';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, getTotal } = useCartStore();
@@ -25,6 +28,8 @@ export default function CartPage() {
   const [previewMessage, setPreviewMessage] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [orderReference, setOrderReference] = useState('');
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [orderSaveError, setOrderSaveError] = useState<string | null>(null);
 
   const total = getTotal();
 
@@ -46,49 +51,113 @@ export default function CartPage() {
     setShowPreview(true);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!customerName || !customerPhone) {
       alert('Please enter your name and phone number');
       return;
     }
 
-    const message = buildWhatsAppMessage({
-      customerName,
-      customerPhone,
-      customerAddress,
-      items,
-      total,
-    });
+    setIsSavingOrder(true);
+    setOrderSaveError(null);
 
-    const whatsappUrl = getWhatsAppLink(STORE_WHATSAPP_NUMBER, message);
+    try {
+      // Generate order reference (consistent with WhatsApp message)
+      const orderRef = generateOrderReference();
+      const orderDate = new Date().toISOString();
 
-    // Extract order reference from message (it's in the message)
-    const orderRefMatch = message.match(/\*Order Ref:\* ([^\n]+)/);
-    const orderRef = orderRefMatch ? orderRefMatch[1] : 'N/A';
-    setOrderReference(orderRef);
+      // Calculate item count (total quantity of all items)
+      const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-    // Open WhatsApp
-    window.open(whatsappUrl, '_blank');
+      // Prepare order data for backend (snake_case as per API spec)
+      const orderData: CreateOrderRequest = {
+        order_reference: orderRef,
+        order_date: orderDate,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        customer_address: customerAddress || undefined,
+        items: items.map((item) => ({
+          product: item.productId, // UUID of product
+          product_name: item.name,
+          product_barcode: item.barcode,
+          product_image: item.image,
+          quantity: item.quantity,
+          unit_price: item.unitPrice.toFixed(2), // Send as string decimal
+          selected_size: item.selectedSize,
+          selected_color: item.selectedColor,
+        })),
+        total: total.toFixed(2), // Send as string decimal
+        item_count: itemCount, // Total quantity of items
+      };
 
-    // Optionally copy to clipboard
-    copyToClipboard(message).then((success) => {
-      if (success) {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 3000);
-      }
-    });
+      // Save order to backend
+      const savedOrder = await createOrder(orderData);
+      console.log('Order saved to backend:', savedOrder);
 
-    // Show success modal and clear cart
-    setShowSuccessModal(true);
-    
-    // Clear the cart after order is sent
-    setTimeout(() => {
-      clearCart();
-      setCustomerName('');
-      setCustomerPhone('');
-      setCustomerAddress('');
-      setShowCheckout(false);
-    }, 500);
+      // Build WhatsApp message with the saved order reference
+      const message = buildWhatsAppMessage(
+        {
+          customerName,
+          customerPhone,
+          customerAddress,
+          items,
+          total,
+        },
+        savedOrder.orderReference // Use backend order reference
+      );
+
+      const whatsappUrl = getWhatsAppLink(STORE_WHATSAPP_NUMBER, message);
+
+      // Set order reference for success modal
+      setOrderReference(savedOrder.orderReference);
+
+      // Open WhatsApp
+      window.open(whatsappUrl, '_blank');
+
+      // Optionally copy to clipboard
+      copyToClipboard(message).then((success) => {
+        if (success) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 3000);
+        }
+      });
+
+      // Show success modal and clear cart
+      setShowSuccessModal(true);
+
+      // Clear the cart after order is sent
+      setTimeout(() => {
+        clearCart();
+        setCustomerName('');
+        setCustomerPhone('');
+        setCustomerAddress('');
+        setShowCheckout(false);
+      }, 500);
+    } catch (error) {
+      console.error('Failed to save order to backend:', error);
+      setOrderSaveError(
+        'Failed to save order. You can still send via WhatsApp, but please inform the store about this issue.'
+      );
+
+      // Allow user to proceed with WhatsApp even if backend fails
+      const message = buildWhatsAppMessage({
+        customerName,
+        customerPhone,
+        customerAddress,
+        items,
+        total,
+      });
+
+      const orderRefMatch = message.match(/\*Order Ref:\* ([^\n]+)/);
+      const orderRef = orderRefMatch ? orderRefMatch[1] : 'N/A';
+      setOrderReference(orderRef);
+
+      const whatsappUrl = getWhatsAppLink(STORE_WHATSAPP_NUMBER, message);
+      window.open(whatsappUrl, '_blank');
+
+      // Don't clear cart if backend failed, in case they want to retry
+    } finally {
+      setIsSavingOrder(false);
+    }
   };
 
   const handleCopyMessage = async () => {
@@ -278,12 +347,20 @@ export default function CartPage() {
                 />
 
                 <div className="space-y-2">
+                  {/* Error Message */}
+                  {orderSaveError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-caption text-red-700">
+                      {orderSaveError}
+                    </div>
+                  )}
+
                   {/* Preview Button */}
                   <Button
                     variant="secondary"
                     fullWidth
                     onClick={handlePreview}
                     type="button"
+                    disabled={isSavingOrder}
                   >
                     👁️ Preview Message
                   </Button>
@@ -294,8 +371,9 @@ export default function CartPage() {
                     fullWidth
                     onClick={handleCheckout}
                     type="button"
+                    disabled={isSavingOrder}
                   >
-                    📱 Send Order via WhatsApp
+                    {isSavingOrder ? '💾 Saving Order...' : '📱 Send Order via WhatsApp'}
                   </Button>
 
                   {/* Copy to Clipboard */}
@@ -304,6 +382,7 @@ export default function CartPage() {
                     fullWidth
                     onClick={handleCopyMessage}
                     type="button"
+                    disabled={isSavingOrder}
                   >
                     {copied ? '✓ Copied!' : '📋 Copy Message'}
                   </Button>
