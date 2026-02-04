@@ -71,7 +71,7 @@ function transformOrder(order: OrderBackend): Order {
  * @returns Created order with ID (transformed to camelCase)
  */
 export async function createOrder(orderData: CreateOrderRequest): Promise<Order> {
-  const response = await apiClient.post<OrderBackend>('/api/api/orders/', orderData);
+  const response = await apiClient.post<OrderBackend>('/api/orders/', orderData);
   return transformOrder(response.data);
 }
 
@@ -91,7 +91,7 @@ export async function getOrders(params?: {
   ordering?: string;
   search?: string;
 }): Promise<Order[]> {
-  const response = await apiClient.get<OrderBackend[]>('/api/api/orders/', { params });
+  const response = await apiClient.get<OrderBackend[]>('/api/orders/', { params });
   return response.data.map(transformOrder);
 }
 
@@ -102,7 +102,7 @@ export async function getOrders(params?: {
  * @returns Array of user's orders (transformed to camelCase)
  */
 export async function getMyOrders(): Promise<Order[]> {
-  const response = await apiClient.get<OrderBackend[]>('/api/api/orders/my-orders/');
+  const response = await apiClient.get<OrderBackend[]>('/api/orders/my-orders/');
   return response.data.map(transformOrder);
 }
 
@@ -114,7 +114,7 @@ export async function getMyOrders(): Promise<Order[]> {
  * @returns Order details with items (transformed to camelCase)
  */
 export async function getOrderById(orderId: string): Promise<Order> {
-  const response = await apiClient.get<OrderBackend>(`/api/api/orders/${orderId}/`);
+  const response = await apiClient.get<OrderBackend>(`/api/orders/${orderId}/`);
   return transformOrder(response.data);
 }
 
@@ -151,7 +151,7 @@ export async function updateOrderStatus(
  */
 export async function confirmOrder(orderId: string): Promise<ConfirmOrderResponseTransformed> {
   const response = await apiClient.post<ConfirmOrderResponse>(
-    `/api/api/orders/${orderId}/confirm/`
+    `/api/orders/${orderId}/confirm/`
   );
   
   // Transform the order in the response
