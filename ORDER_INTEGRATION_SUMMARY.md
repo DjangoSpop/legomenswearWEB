@@ -298,3 +298,43 @@ Complete specification document created: [DJANGO_ORDER_BACKEND.md](DJANGO_ORDER_
 Once you implement the Django backend following [DJANGO_ORDER_BACKEND.md](DJANGO_ORDER_BACKEND.md), the entire order management system will be operational!
 
 **Questions or issues? Check the documentation or test with sample data first.**
+/// to do AttributeError at /api/orders/805fbe61-91e4-4fd7-8737-3868e8289956/confirm/
+'Product' object has no attribute 'stock_quantity'
+
+Request Method: POST
+Request URL: https://lego-menswear-backend-abf196114bd9.herokuapp.com/api/orders/805fbe61-91e4-4fd7-8737-3868e8289956/confirm/
+Django Version: 6.0.1
+Python Executable: /app/.heroku/python/bin/python
+Python Version: 3.12.12
+Python Path: ['/app/.heroku/python/bin', '/app', '/app/.heroku/python/lib/python312.zip', '/app/.heroku/python/lib/python3.12', '/app/.heroku/python/lib/python3.12/lib-dynload', '/app/.heroku/python/lib/python3.12/site-packages']
+Server time: Wed, 04 Feb 2026 21:36:38 +0000
+Installed Applications:
+['django.contrib.admin',
+ 'django.contrib.auth',
+ 'django.contrib.contenttypes',
+ 'django.contrib.sessions',
+ 'django.contrib.messages',
+ 'cloudinary_storage',
+ 'cloudinary',
+ 'django.contrib.staticfiles',
+ 'rest_framework',
+ 'rest_framework_simplejwt',
+ 'corsheaders',
+ 'django_filters',
+ 'drf_spectacular',
+ 'django_cleanup.apps.CleanupConfig',
+ 'users.apps.UsersConfig',
+ 'catalog.apps.CatalogConfig',
+ 'orders.apps.OrdersConfig']
+Installed Middleware:
+['django.middleware.security.SecurityMiddleware',
+ 'whitenoise.middleware.WhiteNoiseMiddleware',
+ 'django.contrib.sessions.middleware.SessionMiddleware',
+ 'corsheaders.middleware.CorsMiddleware',
+ 'django.middleware.common.CommonMiddleware',
+ 'django.middleware.csrf.CsrfViewMiddleware',
+ 'django.contrib.auth.middleware.AuthenticationMiddleware',
+ 'django.contrib.messages.middleware.MessageMiddleware',
+ 'django.middleware.clickjacking.XFrameOptionsMiddleware']
+
+error on the status of the order dont go as the backend is , requested another data type so their is a missmatch between what  the backend is waiting and the front end is sending 

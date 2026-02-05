@@ -131,7 +131,7 @@ export async function updateOrderStatus(
   statusData: UpdateOrderStatusRequest
 ): Promise<Order> {
   const response = await apiClient.patch<OrderBackend>(
-    `/api/api/orders/${orderId}/`,
+    `/api/orders/${orderId}/`,
     statusData
   );
   return transformOrder(response.data);
